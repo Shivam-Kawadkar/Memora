@@ -17,8 +17,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Memory Vault",
-  description: "Capture, store, and share your group memories.",
+  title: "Memora — Shared Memories",
+  description: "Capture, store, and share your group's memories — privately.",
+  icons: {
+    icon: "/icon.png",
+  },
 };
 
 export default function RootLayout({

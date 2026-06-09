@@ -56,7 +56,7 @@ export default function NavBarShell({
             📸
           </span>
           <span className="grad-text hidden text-lg tracking-tight sm:inline">
-            Memory Vault
+            Memora
           </span>
         </Link>
 

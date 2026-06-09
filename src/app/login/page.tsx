@@ -17,7 +17,7 @@ export default function LoginPage() {
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl grad-accent text-3xl shadow-lg shadow-indigo-500/30">
             📸
           </div>
-          <h1 className="text-3xl font-bold tracking-tight grad-text">Memory Vault</h1>
+          <h1 className="text-3xl font-bold tracking-tight grad-text">Memora</h1>
           <p className="mt-2 text-sm text-faint">Welcome — sign in to continue.</p>
         </div>
 

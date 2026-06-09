@@ -42,7 +42,7 @@ export async function getMemoriesForGroup(
   let query = supabase
     .from("memories")
     .select(
-      "id, caption, created_at, uploader_id, image_path, album_id, profiles ( name, avatar_url )",
+      "id, caption, created_at, uploader_id, image_path, album_id, profiles!memories_uploader_id_fkey ( name, avatar_url )",
     )
     .eq("group_id", groupId);
 

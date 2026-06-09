@@ -49,9 +49,9 @@ export default function LandingPage() {
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
         <div className="flex items-center gap-2.5 font-bold">
           <span className="flex h-8 w-8 items-center justify-center rounded-lg grad-accent text-base shadow-md shadow-indigo-500/30">
-            📸
+            <img src="/icon.png" alt="Memora icon" style={{ width: "50%", height: "50%" }} />
           </span>
-          <span className="grad-text text-lg tracking-tight">Memory Vault</span>
+          <span className="grad-text text-lg tracking-tight">Memora</span>
         </div>
         <div className="flex items-center gap-3">
           <ThemeToggle />
@@ -198,10 +198,10 @@ export default function LandingPage() {
             <span className="flex h-6 w-6 items-center justify-center rounded-md grad-accent text-xs">
               📸
             </span>
-            Memory Vault
+            Memora
           </div>
           <p className="text-xs text-subtle">
-            © 2026 Memory Vault · Made for Batch 2024–28
+            © 2026 Memora · Made for Batch 2024–28
           </p>
         </div>
       </footer>

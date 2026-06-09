@@ -23,14 +23,18 @@ export async function getMemoryDetail(
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("memories")
     .select(
-      "id, group_id, caption, created_at, uploader_id, image_path, album_id, profiles ( name, avatar_url )",
+      "id, group_id, caption, created_at, uploader_id, image_path, album_id, profiles!memories_uploader_id_fkey ( name, avatar_url )",
     )
     .eq("id", memoryId)
     .maybeSingle();
-  if (!data) return null;
+  if (error) console.error("[getMemoryDetail] query error:", error);
+  if (!data) {
+    console.error("[getMemoryDetail] no row for", memoryId, "user:", user?.id);
+    return null;
+  }
   const row = data as unknown as DetailRow;
 
   const { data: signed } = await supabase.storage

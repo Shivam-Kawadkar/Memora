@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { uploadMemoryAction } from "@/lib/actions";
 import type { AlbumRef } from "@/lib/types";
 
@@ -15,6 +16,7 @@ export default function UploadMemoryButton({
   albums?: AlbumRef[];
   defaultAlbumId?: string;
 }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -68,7 +70,10 @@ export default function UploadMemoryButton({
     startTransition(async () => {
       const res = await uploadMemoryAction(groupId, formData);
       if (res?.error) setError(res.error);
-      else close();
+      else {
+        close();
+        router.refresh();
+      }
     });
   }
 
@@ -135,6 +140,7 @@ export default function UploadMemoryButton({
                 <select
                   name="album_id"
                   defaultValue={defaultAlbumId}
+                  aria-label="Album"
                   className="w-full rounded-xl border border-app bg-soft px-4 py-2.5 text-sm text-app outline-none transition focus:border-indigo-400/60"
                 >
                   <option value="">No album</option>

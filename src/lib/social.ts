@@ -30,31 +30,24 @@ export async function getMemoryDetail(
     )
     .eq("id", memoryId)
     .maybeSingle();
+  // Only a real query error is worth logging; a missing row is a normal 404
+  // (e.g. deleted memory, or a non-member blocked by RLS).
   if (error) console.error("[getMemoryDetail] query error:", error);
-  if (!data) {
-    console.error("[getMemoryDetail] no row for", memoryId, "user:", user?.id);
-    return null;
-  }
+  if (!data) return null;
   const row = data as unknown as DetailRow;
 
-  const { data: signed } = await supabase.storage
-    .from("memories")
-    .createSignedUrl(row.image_path, SIGNED_URL_TTL);
+  // These three lookups are independent — run them in parallel.
+  const [signedRes, albumRes, likesRes] = await Promise.all([
+    supabase.storage.from("memories").createSignedUrl(row.image_path, SIGNED_URL_TTL),
+    row.album_id
+      ? supabase.from("albums").select("title").eq("id", row.album_id).maybeSingle()
+      : Promise.resolve({ data: null }),
+    supabase.from("likes").select("user_id").eq("memory_id", memoryId),
+  ]);
 
-  let albumTitle: string | null = null;
-  if (row.album_id) {
-    const { data: album } = await supabase
-      .from("albums")
-      .select("title")
-      .eq("id", row.album_id)
-      .maybeSingle();
-    albumTitle = album?.title ?? null;
-  }
-
-  const { data: likes } = await supabase
-    .from("likes")
-    .select("user_id")
-    .eq("memory_id", memoryId);
+  const signed = signedRes.data;
+  const albumTitle = (albumRes.data as { title: string } | null)?.title ?? null;
+  const likes = likesRes.data;
 
   return {
     id: row.id,

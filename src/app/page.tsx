@@ -119,6 +119,8 @@ export default function LandingPage() {
                 <img
                   src={`https://picsum.photos/seed/${seed}/400/500`}
                   alt="memory"
+                  loading="lazy"
+                  decoding="async"
                   className="aspect-[4/5] w-full object-cover grayscale transition duration-500 hover:grayscale-0"
                 />
               </div>

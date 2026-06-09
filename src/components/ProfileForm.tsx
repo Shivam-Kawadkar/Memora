@@ -58,6 +58,8 @@ export default function ProfileForm({ profile }: { profile: MyProfile }) {
             <img
               src={shown}
               alt="Your avatar"
+              loading="lazy"
+              decoding="async"
               className="h-20 w-20 rounded-full object-cover ring-2 ring-[color:var(--border)]"
             />
           ) : (

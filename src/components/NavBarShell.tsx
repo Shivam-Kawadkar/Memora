@@ -28,10 +28,9 @@ export default function NavBarShell({
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Close the mobile menu whenever the route changes.
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [pathname]);
+  // Close the mobile menu on navigation (handled in link onClick below, so we
+  // avoid a setState-inside-effect).
+  const closeMobile = () => setMobileOpen(false);
 
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(href + "/");
@@ -50,6 +49,7 @@ export default function NavBarShell({
       >
         <Link
           href="/groups"
+          onClick={closeMobile}
           className="flex shrink-0 items-center gap-2.5 font-bold"
         >
           <span className="flex h-8 w-8 items-center justify-center rounded-lg grad-accent text-base shadow-md shadow-indigo-500/30">
@@ -131,6 +131,7 @@ export default function NavBarShell({
               <Link
                 key={l.href}
                 href={l.href}
+                onClick={closeMobile}
                 className={`rounded-lg px-3 py-2 text-sm font-medium transition ${
                   isActive(l.href)
                     ? "bg-soft text-app"

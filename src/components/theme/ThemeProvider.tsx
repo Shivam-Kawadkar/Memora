@@ -3,9 +3,8 @@
 import {
   createContext,
   useContext,
-  useEffect,
-  useState,
   useCallback,
+  useSyncExternalStore,
 } from "react";
 
 export type Theme = "light" | "dark" | "system";
@@ -28,55 +27,90 @@ function systemPrefersDark(): boolean {
   );
 }
 
+function resolve(theme: Theme): Resolved {
+  return theme === "system" ? (systemPrefersDark() ? "dark" : "light") : theme;
+}
+
 function applyResolved(resolved: Resolved) {
-  const root = document.documentElement;
-  root.classList.toggle("dark", resolved === "dark");
+  document.documentElement.classList.toggle("dark", resolved === "dark");
+}
+
+// External store so the theme can be read during render via useSyncExternalStore
+// — no setState-inside-effect (which the React compiler flags), and SSR-safe via
+// a stable server snapshot. Theme is a single global, so a module singleton fits.
+const SERVER_SNAPSHOT: { theme: Theme; resolved: Resolved } = {
+  theme: "system",
+  resolved: "light",
+};
+let store: { theme: Theme; resolved: Resolved } = SERVER_SNAPSHOT;
+const listeners = new Set<() => void>();
+
+function readStoredTheme(): Theme {
+  try {
+    return (localStorage.getItem(STORAGE_KEY) as Theme | null) ?? "system";
+  } catch {
+    return "system";
+  }
+}
+
+// Recompute the snapshot from storage + OS preference, apply it to the DOM,
+// and notify subscribers only when something actually changed (keeps the
+// snapshot reference stable, as useSyncExternalStore requires).
+function recompute() {
+  const theme = readStoredTheme();
+  const resolved = resolve(theme);
+  if (store.theme !== theme || store.resolved !== resolved) {
+    store = { theme, resolved };
+    applyResolved(resolved);
+    for (const l of listeners) l();
+  }
+}
+
+function subscribe(cb: () => void): () => void {
+  listeners.add(cb);
+  const mq = window.matchMedia("(prefers-color-scheme: dark)");
+  const onChange = () => recompute();
+  mq.addEventListener("change", onChange); // OS theme changes (system mode)
+  window.addEventListener("storage", onChange); // other tabs
+  recompute(); // sync to the real value now that we're on the client
+  return () => {
+    listeners.delete(cb);
+    mq.removeEventListener("change", onChange);
+    window.removeEventListener("storage", onChange);
+  };
+}
+
+function setThemeGlobal(next: Theme) {
+  try {
+    localStorage.setItem(STORAGE_KEY, next);
+  } catch {
+    // ignore (private mode / storage disabled)
+  }
+  recompute();
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  // Start from whatever the no-flash script already decided, so the first
-  // client render matches the server-painted DOM.
-  const [theme, setThemeState] = useState<Theme>("system");
-  const [resolved, setResolved] = useState<Resolved>("light");
+  const snapshot = useSyncExternalStore(
+    subscribe,
+    () => store,
+    () => SERVER_SNAPSHOT,
+  );
 
-  // Hydrate state from storage once mounted.
-  useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
-    const initial: Theme = stored ?? "system";
-    setThemeState(initial);
-    setResolved(
-      initial === "system" ? (systemPrefersDark() ? "dark" : "light") : initial,
-    );
-  }, []);
-
-  // React to OS changes while in "system" mode.
-  useEffect(() => {
-    if (theme !== "system") return;
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const onChange = () => {
-      const next: Resolved = mq.matches ? "dark" : "light";
-      setResolved(next);
-      applyResolved(next);
-    };
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, [theme]);
-
-  const setTheme = useCallback((next: Theme) => {
-    setThemeState(next);
-    localStorage.setItem(STORAGE_KEY, next);
-    const r: Resolved =
-      next === "system" ? (systemPrefersDark() ? "dark" : "light") : next;
-    setResolved(r);
-    applyResolved(r);
-  }, []);
-
-  const toggle = useCallback(() => {
-    setTheme(resolved === "dark" ? "light" : "dark");
-  }, [resolved, setTheme]);
+  const setTheme = useCallback((next: Theme) => setThemeGlobal(next), []);
+  const toggle = useCallback(
+    () => setThemeGlobal(snapshot.resolved === "dark" ? "light" : "dark"),
+    [snapshot.resolved],
+  );
 
   return (
-    <ThemeContext.Provider value={{ theme, resolved, setTheme, toggle }}>
+    <ThemeContext.Provider
+      value={{
+        theme: snapshot.theme,
+        resolved: snapshot.resolved,
+        setTheme,
+        toggle,
+      }}
+    >
       {children}
     </ThemeContext.Provider>
   );

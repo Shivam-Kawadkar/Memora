@@ -58,6 +58,8 @@ export default function MemoryCard({
           <img
             src={memory.uploaderAvatar}
             alt={memory.uploaderName}
+            loading="lazy"
+            decoding="async"
             className="h-9 w-9 rounded-full ring-2 ring-[color:var(--border)]"
           />
         ) : (
@@ -100,6 +102,8 @@ export default function MemoryCard({
         <img
           src={memory.imageUrl}
           alt={memory.caption || "memory"}
+          loading="lazy"
+          decoding="async"
           className="aspect-square w-full object-cover"
         />
       </Link>

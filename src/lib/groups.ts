@@ -62,22 +62,25 @@ export async function getGroupForUser(groupId: string): Promise<Group | null> {
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const { data: group } = await supabase
-    .from("groups")
-    .select("id, name, description, cover_color")
-    .eq("id", groupId)
-    .maybeSingle();
-  if (!group) return null;
+  // group row, my membership, and member counts are independent reads.
+  const [groupRes, membershipRes, counts] = await Promise.all([
+    supabase
+      .from("groups")
+      .select("id, name, description, cover_color")
+      .eq("id", groupId)
+      .maybeSingle(),
+    supabase
+      .from("memberships")
+      .select("role")
+      .eq("group_id", groupId)
+      .eq("user_id", user.id)
+      .maybeSingle(),
+    getMemberCounts([groupId]),
+  ]);
 
-  const { data: myMembership } = await supabase
-    .from("memberships")
-    .select("role")
-    .eq("group_id", groupId)
-    .eq("user_id", user.id)
-    .maybeSingle();
-  if (!myMembership) return null;
-
-  const counts = await getMemberCounts([groupId]);
+  const group = groupRes.data;
+  const myMembership = membershipRes.data;
+  if (!group || !myMembership) return null;
 
   return {
     id: group.id,

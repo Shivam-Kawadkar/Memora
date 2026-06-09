@@ -63,6 +63,8 @@ export default async function GroupsPage() {
                 <img
                   src={m.imageUrl}
                   alt="recent memory"
+                  loading="lazy"
+                  decoding="async"
                   className="h-24 w-24 object-cover transition hover:scale-105"
                 />
               </Link>

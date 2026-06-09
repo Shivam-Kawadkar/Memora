@@ -104,6 +104,7 @@ export default function UploadMemoryButton({
                     <img
                       src={preview}
                       alt="Selected preview"
+                      decoding="async"
                       className="aspect-square w-full object-cover"
                     />
                     <span className="absolute bottom-2 right-2 rounded-lg bg-black/60 px-2 py-1 text-xs font-medium text-white">

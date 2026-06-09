@@ -12,13 +12,16 @@ export default async function MemoryDetailPage({
 }) {
   const { id, memoryId } = await params;
 
-  const group = await getGroupForUser(id);
-  if (!group) notFound();
+  // group, memory and comments are independent reads — run them together.
+  const [group, memory, comments] = await Promise.all([
+    getGroupForUser(id),
+    getMemoryDetail(memoryId),
+    getComments(memoryId),
+  ]);
 
-  const memory = await getMemoryDetail(memoryId);
+  if (!group) notFound();
   if (!memory || memory.groupId !== id) notFound();
 
-  const comments = await getComments(memoryId);
   const canModerate =
     group.myRole === "admin" || group.myRole === "moderator";
   const initial = memory.uploaderName.trim().charAt(0).toUpperCase() || "?";
@@ -38,6 +41,9 @@ export default async function MemoryDetailPage({
           <img
             src={memory.imageUrl}
             alt={memory.caption || "memory"}
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
             className="w-full object-cover"
           />
         </div>
@@ -49,6 +55,8 @@ export default async function MemoryDetailPage({
               <img
                 src={memory.uploaderAvatar}
                 alt={memory.uploaderName}
+                loading="lazy"
+                decoding="async"
                 className="h-10 w-10 rounded-full ring-2 ring-[color:var(--border)]"
               />
             ) : (

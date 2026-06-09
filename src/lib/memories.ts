@@ -54,48 +54,45 @@ export async function getMemoriesForGroup(
 
   const rows = data as unknown as MemoryRow[];
 
-  const { data: signed } = await supabase.storage
-    .from("memories")
-    .createSignedUrls(
-      rows.map((r) => r.image_path),
-      SIGNED_URL_TTL,
-    );
+  const memIds = rows.map((r) => r.id);
+  const usedAlbumIds = [
+    ...new Set(rows.map((r) => r.album_id).filter((x): x is string => !!x)),
+  ];
+
+  // Signed URLs, album titles, like rows and comment rows are all independent
+  // of each other — fetch them in parallel instead of four serial round-trips.
+  const [signedRes, albumsRes, likesRes, cmtsRes] = await Promise.all([
+    supabase.storage
+      .from("memories")
+      .createSignedUrls(
+        rows.map((r) => r.image_path),
+        SIGNED_URL_TTL,
+      ),
+    usedAlbumIds.length > 0
+      ? supabase.from("albums").select("id, title").in("id", usedAlbumIds)
+      : Promise.resolve({ data: [] as { id: string; title: string }[] }),
+    supabase.from("likes").select("memory_id, user_id").in("memory_id", memIds),
+    supabase.from("comments").select("memory_id").in("memory_id", memIds),
+  ]);
+
   const urlByPath = new Map<string, string>();
-  for (const s of signed ?? []) {
+  for (const s of signedRes.data ?? []) {
     if (s.path && s.signedUrl) urlByPath.set(s.path, s.signedUrl);
   }
 
   // Map album ids -> titles for chips.
   const titleById = new Map<string, string>();
-  const usedAlbumIds = [
-    ...new Set(rows.map((r) => r.album_id).filter((x): x is string => !!x)),
-  ];
-  if (usedAlbumIds.length > 0) {
-    const { data: albums } = await supabase
-      .from("albums")
-      .select("id, title")
-      .in("id", usedAlbumIds);
-    for (const a of albums ?? []) titleById.set(a.id, a.title);
-  }
+  for (const a of albumsRes.data ?? []) titleById.set(a.id, a.title);
 
   // Like + comment counts for these memories.
-  const memIds = rows.map((r) => r.id);
   const likeCount = new Map<string, number>();
   const likedByMe = new Set<string>();
-  const { data: likes } = await supabase
-    .from("likes")
-    .select("memory_id, user_id")
-    .in("memory_id", memIds);
-  for (const l of likes ?? []) {
+  for (const l of likesRes.data ?? []) {
     likeCount.set(l.memory_id, (likeCount.get(l.memory_id) ?? 0) + 1);
     if (l.user_id === user?.id) likedByMe.add(l.memory_id);
   }
   const commentCount = new Map<string, number>();
-  const { data: cmts } = await supabase
-    .from("comments")
-    .select("memory_id")
-    .in("memory_id", memIds);
-  for (const c of cmts ?? [])
+  for (const c of cmtsRes.data ?? [])
     commentCount.set(c.memory_id, (commentCount.get(c.memory_id) ?? 0) + 1);
 
   return rows

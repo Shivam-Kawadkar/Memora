@@ -297,6 +297,8 @@ async function AlbumsGrid({
                   <img
                     src={a.coverUrl}
                     alt={a.title}
+                    loading="lazy"
+                    decoding="async"
                     className="h-36 w-full object-cover"
                   />
                 ) : (

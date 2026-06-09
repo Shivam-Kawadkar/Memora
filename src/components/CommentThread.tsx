@@ -17,6 +17,8 @@ function Avatar({ name, url }: { name: string; url: string }) {
       <img
         src={url}
         alt={name}
+        loading="lazy"
+        decoding="async"
         className="h-8 w-8 shrink-0 rounded-full ring-2 ring-[color:var(--border)]"
       />
     );

@@ -34,6 +34,8 @@ export default function UserMenu({
           <img
             src={avatarUrl}
             alt={name}
+            loading="lazy"
+            decoding="async"
             className="h-9 w-9 rounded-full ring-2 ring-[color:var(--border)]"
           />
         ) : (

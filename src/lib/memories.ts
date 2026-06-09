@@ -3,7 +3,7 @@ import type { FeedMemory } from "@/lib/types";
 
 const SIGNED_URL_TTL = 60 * 60; // 1 hour
 
-function timeAgo(iso: string): string {
+export function timeAgo(iso: string): string {
   const then = new Date(iso).getTime();
   const seconds = Math.max(0, Math.floor((Date.now() - then) / 1000));
   if (seconds < 60) return "just now";
@@ -78,6 +78,26 @@ export async function getMemoriesForGroup(
     for (const a of albums ?? []) titleById.set(a.id, a.title);
   }
 
+  // Like + comment counts for these memories.
+  const memIds = rows.map((r) => r.id);
+  const likeCount = new Map<string, number>();
+  const likedByMe = new Set<string>();
+  const { data: likes } = await supabase
+    .from("likes")
+    .select("memory_id, user_id")
+    .in("memory_id", memIds);
+  for (const l of likes ?? []) {
+    likeCount.set(l.memory_id, (likeCount.get(l.memory_id) ?? 0) + 1);
+    if (l.user_id === user?.id) likedByMe.add(l.memory_id);
+  }
+  const commentCount = new Map<string, number>();
+  const { data: cmts } = await supabase
+    .from("comments")
+    .select("memory_id")
+    .in("memory_id", memIds);
+  for (const c of cmts ?? [])
+    commentCount.set(c.memory_id, (commentCount.get(c.memory_id) ?? 0) + 1);
+
   return rows
     .map((r) => ({
       id: r.id,
@@ -89,6 +109,9 @@ export async function getMemoriesForGroup(
       isMine: r.uploader_id === user?.id,
       albumId: r.album_id,
       albumTitle: r.album_id ? titleById.get(r.album_id) ?? null : null,
+      likeCount: likeCount.get(r.id) ?? 0,
+      likedByMe: likedByMe.has(r.id),
+      commentCount: commentCount.get(r.id) ?? 0,
     }))
     .filter((m) => m.imageUrl !== "");
 }

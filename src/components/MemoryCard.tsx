@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { deleteMemoryAction, setMemoryAlbumAction } from "@/lib/actions";
+import LikeButton from "@/components/LikeButton";
 import type { AlbumRef, FeedMemory } from "@/lib/types";
 
 export default function MemoryCard({
@@ -22,6 +24,7 @@ export default function MemoryCard({
   const canEdit = memory.isMine || canModerate;
   const showSelect = canEdit && albums.length > 0;
   const initial = memory.uploaderName.trim().charAt(0).toUpperCase() || "?";
+  const detailHref = `/groups/${groupId}/memory/${memory.id}`;
 
   function onDelete() {
     if (!window.confirm("Delete this memory? This can't be undone.")) return;
@@ -92,51 +95,71 @@ export default function MemoryCard({
         )}
       </div>
 
-      <div className="relative">
+      <Link href={detailHref} className="block">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={memory.imageUrl}
           alt={memory.caption || "memory"}
           className="aspect-square w-full object-cover"
         />
-      </div>
+      </Link>
 
-      {(showSelect || memory.albumTitle || memory.caption) && (
-        <div className="space-y-2.5 p-4">
-          {showSelect ? (
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-subtle">📁</span>
-              <select
-                value={memory.albumId ?? ""}
-                disabled={pending}
-                onChange={(e) => moveTo(e.target.value)}
-                className="rounded-lg border border-app bg-soft px-2.5 py-1 text-xs text-app outline-none transition focus:border-indigo-400/60 disabled:opacity-50"
-              >
-                <option value="">No album</option>
-                {albums.map((a) => (
-                  <option key={a.id} value={a.id}>
-                    {a.title}
-                  </option>
-                ))}
-              </select>
-            </div>
-          ) : (
-            memory.albumTitle && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-soft px-2.5 py-0.5 text-xs text-muted">
-                📁 {memory.albumTitle}
-              </span>
-            )
-          )}
-          {memory.caption && (
-            <p className="text-sm leading-relaxed text-muted">
-              {memory.caption}
-            </p>
-          )}
+      <div className="space-y-3 p-4">
+        <div className="flex items-center gap-5 text-sm">
+          <LikeButton
+            memoryId={memory.id}
+            groupId={groupId}
+            initialLiked={memory.likedByMe}
+            initialCount={memory.likeCount}
+          />
+          <Link
+            href={detailHref}
+            className="flex items-center gap-1.5 text-faint transition hover:text-app"
+          >
+            <span className="text-base">💬</span>
+            {memory.commentCount}
+          </Link>
+          <Link
+            href={detailHref}
+            className="ml-auto text-xs text-subtle transition hover:text-app"
+          >
+            View →
+          </Link>
         </div>
-      )}
-      {error && (
-        <p className="px-4 pb-3 text-xs text-red-500 dark:text-red-400">{error}</p>
-      )}
+
+        {showSelect ? (
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-subtle">📁</span>
+            <select
+              value={memory.albumId ?? ""}
+              disabled={pending}
+              aria-label="Move to album"
+              onChange={(e) => moveTo(e.target.value)}
+              className="rounded-lg border border-app bg-soft px-2.5 py-1 text-xs text-app outline-none transition focus:border-indigo-400/60 disabled:opacity-50"
+            >
+              <option value="">No album</option>
+              {albums.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.title}
+                </option>
+              ))}
+            </select>
+          </div>
+        ) : (
+          memory.albumTitle && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-soft px-2.5 py-0.5 text-xs text-muted">
+              📁 {memory.albumTitle}
+            </span>
+          )
+        )}
+
+        {memory.caption && (
+          <p className="text-sm leading-relaxed text-muted">{memory.caption}</p>
+        )}
+        {error && (
+          <p className="text-xs text-red-500 dark:text-red-400">{error}</p>
+        )}
+      </div>
     </div>
   );
 }

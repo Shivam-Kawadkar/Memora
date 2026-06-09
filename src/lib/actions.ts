@@ -393,3 +393,103 @@ export async function setMemoryAlbumAction(
   revalidatePath(`/groups/${groupId}`);
   return {};
 }
+
+// ---------------------------------------------------------------------------
+// Likes & comments
+// ---------------------------------------------------------------------------
+
+export async function toggleLikeAction(
+  memoryId: string,
+  groupId: string,
+): Promise<{ liked?: boolean; error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "You're not signed in." };
+
+  const { data: existing } = await supabase
+    .from("likes")
+    .select("memory_id")
+    .eq("memory_id", memoryId)
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (existing) {
+    const { error } = await supabase
+      .from("likes")
+      .delete()
+      .eq("memory_id", memoryId)
+      .eq("user_id", user.id);
+    if (error) return { error: error.message };
+  } else {
+    const { error } = await supabase
+      .from("likes")
+      .insert({ memory_id: memoryId, user_id: user.id });
+    if (error) return { error: error.message };
+  }
+
+  revalidatePath(`/groups/${groupId}`);
+  revalidatePath(`/groups/${groupId}/memory/${memoryId}`);
+  return { liked: !existing };
+}
+
+export async function addCommentAction(
+  memoryId: string,
+  groupId: string,
+  formData: FormData,
+): Promise<ActionResult> {
+  const body = String(formData.get("body") ?? "").trim();
+  if (!body) return { error: "Comment can't be empty." };
+  if (body.length > 1000) return { error: "Comment is too long." };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "You're not signed in." };
+
+  const { error } = await supabase
+    .from("comments")
+    .insert({ memory_id: memoryId, user_id: user.id, body });
+  if (error) return { error: error.message };
+
+  revalidatePath(`/groups/${groupId}/memory/${memoryId}`);
+  revalidatePath(`/groups/${groupId}`);
+  return {};
+}
+
+export async function editCommentAction(
+  commentId: string,
+  memoryId: string,
+  groupId: string,
+  formData: FormData,
+): Promise<ActionResult> {
+  const body = String(formData.get("body") ?? "").trim();
+  if (!body) return { error: "Comment can't be empty." };
+  if (body.length > 1000) return { error: "Comment is too long." };
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("comments")
+    .update({ body })
+    .eq("id", commentId);
+  if (error) return { error: error.message };
+
+  revalidatePath(`/groups/${groupId}/memory/${memoryId}`);
+  return {};
+}
+
+export async function deleteCommentAction(
+  commentId: string,
+  memoryId: string,
+  groupId: string,
+): Promise<ActionResult> {
+  const supabase = await createClient();
+  const { error } = await supabase.from("comments").delete().eq("id", commentId);
+  if (error) return { error: error.message };
+
+  revalidatePath(`/groups/${groupId}/memory/${memoryId}`);
+  revalidatePath(`/groups/${groupId}`);
+  return {};
+}

@@ -26,6 +26,32 @@ export type FeedMemory = {
   isMine: boolean;
   albumId: string | null;
   albumTitle: string | null;
+  likeCount: number;
+  likedByMe: boolean;
+  commentCount: number;
+};
+
+export type MemoryDetail = {
+  id: string;
+  groupId: string;
+  imageUrl: string;
+  caption: string;
+  uploaderName: string;
+  uploaderAvatar: string;
+  createdAt: string;
+  isMine: boolean;
+  albumTitle: string | null;
+  likeCount: number;
+  likedByMe: boolean;
+};
+
+export type Comment = {
+  id: string;
+  body: string;
+  createdAt: string; // relative
+  authorName: string;
+  authorAvatar: string;
+  isMine: boolean;
 };
 
 export type AlbumSummary = {

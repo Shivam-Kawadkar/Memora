@@ -60,7 +60,7 @@ export default async function GroupFeedPage({
     <Link
       href={`/groups/${group.id}/settings`}
       aria-label="Group settings"
-      className="flex h-10 w-10 items-center justify-center rounded-xl glass text-faint transition hover:border-app hover:text-app"
+      className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 text-white backdrop-blur-md transition hover:bg-white/25 active:scale-95"
     >
       <svg
         viewBox="0 0 24 24"
@@ -86,20 +86,38 @@ export default async function GroupFeedPage({
         ← All groups
       </Link>
 
-      <div className="mt-4 mb-6 flex items-end justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-app">
-            {group.name}
-          </h1>
-          <p className="mt-1 text-sm text-faint">
-            {group.memberCount}{" "}
-            {group.memberCount === 1 ? "member" : "members"} · you are{" "}
-            <span className="text-muted">{ROLE_LABEL[group.myRole]}</span>
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          {settingsGear}
-          {isAdmin && <InviteButton groupId={group.id} />}
+      {/* Banner — latest memory image, with gradient fallback */}
+      <div
+        className="relative mt-4 mb-6 overflow-hidden rounded-3xl"
+        style={{
+          backgroundImage: `linear-gradient(135deg, ${group.coverColor}, #a855f7)`,
+        }}
+      >
+        {group.coverUrl && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={group.coverUrl}
+            alt=""
+            decoding="async"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/10" />
+        <div className="relative flex min-h-[9rem] flex-col justify-end gap-3 p-5 sm:min-h-[11rem] sm:flex-row sm:items-end sm:justify-between sm:p-6">
+          <div className="min-w-0">
+            <h1 className="truncate font-display text-3xl font-bold tracking-tight text-white drop-shadow sm:text-4xl">
+              {group.name}
+            </h1>
+            <p className="mt-1 text-sm text-white/80">
+              {group.memberCount}{" "}
+              {group.memberCount === 1 ? "member" : "members"} · you are{" "}
+              <span className="text-white">{ROLE_LABEL[group.myRole]}</span>
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-3">
+            {settingsGear}
+            {isAdmin && <InviteButton groupId={group.id} />}
+          </div>
         </div>
       </div>
 
@@ -196,35 +214,48 @@ async function AlbumView({
     getAlbumRefs(groupId),
   ]);
   const canManageAlbum = canModerate || album.createdBy === userId;
+  const coverUrl = memories[0]?.imageUrl ?? null;
 
   return (
     <>
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <Link
-            href={`/groups/${groupId}?view=albums`}
-            className="text-sm text-faint transition hover:text-app"
-          >
-            ← Albums
-          </Link>
-          <h2 className="mt-1 text-2xl font-bold tracking-tight text-app">
+      <Link
+        href={`/groups/${groupId}?view=albums`}
+        className="text-sm text-faint transition hover:text-app"
+      >
+        ← Albums
+      </Link>
+
+      {/* Album banner — first photo, gradient fallback when empty */}
+      <div className="relative mt-3 mb-6 overflow-hidden rounded-3xl grad-accent">
+        {coverUrl && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={coverUrl}
+            alt=""
+            decoding="async"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/10" />
+        <div className="relative flex min-h-[8rem] flex-col justify-end gap-3 p-5 sm:min-h-[10rem] sm:flex-row sm:items-end sm:justify-between sm:p-6">
+          <h2 className="font-display text-2xl font-bold tracking-tight text-white drop-shadow sm:text-3xl">
             📁 {album.title}{" "}
-            <span className="text-sm font-normal text-subtle">
+            <span className="text-sm font-normal text-white/80">
               · {memories.length} {memories.length === 1 ? "photo" : "photos"}
             </span>
           </h2>
-        </div>
-        <div className="flex items-center gap-3">
-          {canManageAlbum && (
-            <AlbumActions albumId={album.id} groupId={groupId} title={album.title} />
-          )}
-          {canUpload && (
-            <UploadMemoryButton
-              groupId={groupId}
-              albums={albums}
-              defaultAlbumId={album.id}
-            />
-          )}
+          <div className="flex shrink-0 items-center gap-3">
+            {canManageAlbum && (
+              <AlbumActions albumId={album.id} groupId={groupId} title={album.title} />
+            )}
+            {canUpload && (
+              <UploadMemoryButton
+                groupId={groupId}
+                albums={albums}
+                defaultAlbumId={album.id}
+              />
+            )}
+          </div>
         </div>
       </div>
 

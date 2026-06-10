@@ -56,14 +56,15 @@ export default async function JoinPage({
         ) : (
           <>
             <div
-              className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl text-2xl shadow-lg"
+              className="animate-float mx-auto flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl shadow-lg"
               style={{
                 backgroundImage: `linear-gradient(135deg, ${group?.cover_color ?? "#6366f1"}, #a855f7)`,
               }}
             >
-              📸
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/icon.png" alt="Memora" className="h-[68%] w-[68%] object-contain" />
             </div>
-            <h1 className="mt-4 text-xl font-bold text-app">
+            <h1 className="mt-4 font-display text-xl font-bold text-app">
               Join <span className="grad-text">{group?.name ?? "this group"}</span>?
             </h1>
             <p className="mt-2 text-sm text-faint">

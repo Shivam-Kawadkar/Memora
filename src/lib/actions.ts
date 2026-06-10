@@ -4,6 +4,7 @@ import { randomBytes, randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { pickCoverColor } from "@/lib/groups";
 import type { Role } from "@/lib/types";
 
@@ -491,5 +492,47 @@ export async function deleteCommentAction(
 
   revalidatePath(`/groups/${groupId}/memory/${memoryId}`);
   revalidatePath(`/groups/${groupId}`);
+  return {};
+}
+
+// ---------------------------------------------------------------------------
+// Landing-page feedback (works for logged-out visitors too)
+// ---------------------------------------------------------------------------
+
+export async function submitFeedbackAction(
+  formData: FormData,
+): Promise<ActionResult> {
+  const name = String(formData.get("name") ?? "").trim();
+  const email = String(formData.get("email") ?? "").trim();
+  const message = String(formData.get("message") ?? "").trim();
+  const ratingRaw = Number(formData.get("rating"));
+  const rating =
+    Number.isInteger(ratingRaw) && ratingRaw >= 1 && ratingRaw <= 5
+      ? ratingRaw
+      : null;
+
+  if (!message) return { error: "Please write a short message." };
+  if (message.length > 2000) return { error: "Message is too long (max 2000)." };
+  if (name.length > 80) return { error: "Name is too long." };
+  if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))
+    return { error: "That email doesn't look right." };
+
+  // Demo mode (no Supabase keys yet): accept silently so the UI still works.
+  if (!isSupabaseConfigured) return {};
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { error } = await supabase.from("feedback").insert({
+    name: name || null,
+    email: email || null,
+    rating,
+    message,
+    user_id: user?.id ?? null,
+  });
+  if (error) return { error: "Couldn't send feedback. Please try again." };
+
   return {};
 }

@@ -4,6 +4,7 @@ import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { uploadMemoryAction } from "@/lib/actions";
 import type { AlbumRef } from "@/lib/types";
+import { Dots } from "@/components/Loaders";
 
 const MAX_MB = 8;
 
@@ -81,18 +82,18 @@ export default function UploadMemoryButton({
     <>
       <button
         onClick={() => setOpen(true)}
-        className="rounded-xl grad-accent px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition hover:shadow-indigo-500/40 active:scale-[0.97]"
+        className="rounded-xl grad-accent px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition hover:-translate-y-0.5 hover:shadow-indigo-500/40 active:scale-[0.97]"
       >
         + Upload memory
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4">
           <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="animate-fade-in fixed inset-0 bg-black/60 backdrop-blur-sm"
             onClick={close}
           />
-          <div className="animate-fade-up relative w-full max-w-md rounded-2xl glass p-6 shadow-2xl">
+          <div className="animate-pop relative my-auto max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl glass p-6 shadow-2xl">
             <h2 className="text-xl font-bold text-app">Upload a memory</h2>
             <p className="mt-1 text-sm text-faint">Share a photo with the group.</p>
 
@@ -169,9 +170,16 @@ export default function UploadMemoryButton({
                 <button
                   type="submit"
                   disabled={pending}
-                  className="rounded-xl grad-accent px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition hover:shadow-indigo-500/40 active:scale-[0.97] disabled:opacity-60"
+                  className="flex items-center gap-2 rounded-xl grad-accent px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition hover:shadow-indigo-500/40 active:scale-[0.97] disabled:opacity-60"
                 >
-                  {pending ? "Uploading…" : "Share memory"}
+                  {pending ? (
+                    <>
+                      <Dots />
+                      <span>Uploading</span>
+                    </>
+                  ) : (
+                    "Share memory"
+                  )}
                 </button>
               </div>
             </form>

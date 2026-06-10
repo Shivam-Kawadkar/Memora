@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { Dots } from "@/components/Loaders";
 
 export default function GoogleSignInButton() {
   const [loading, setLoading] = useState(false);
@@ -32,14 +33,21 @@ export default function GoogleSignInButton() {
       <button
         onClick={signIn}
         disabled={loading}
-        className="group flex w-full items-center justify-center gap-3 rounded-xl bg-white px-4 py-3 font-medium text-gray-800 shadow-lg transition hover:shadow-xl hover:shadow-white/10 active:scale-[0.98] disabled:opacity-60"
+        className="group flex w-full items-center justify-center gap-3 rounded-xl bg-white px-4 py-3 font-medium text-gray-800 shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-white/10 active:scale-[0.98] disabled:opacity-60"
       >
         {loading ? (
-          <span className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-700" />
+          <>
+            <Dots />
+            <span>Connecting</span>
+          </>
         ) : (
-          <GoogleIcon />
+          <>
+            <span className="transition-transform duration-300 group-hover:scale-110">
+              <GoogleIcon />
+            </span>
+            <span>Continue with Google</span>
+          </>
         )}
-        {loading ? "Connecting…" : "Continue with Google"}
       </button>
       {error && <p className="mt-3 text-center text-xs text-red-400">{error}</p>}
     </>

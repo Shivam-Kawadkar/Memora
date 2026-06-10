@@ -1,5 +1,7 @@
 import Link from "next/link";
 import ThemeToggle from "@/components/theme/ThemeToggle";
+import Logo from "@/components/Logo";
+import FeedbackForm from "@/components/FeedbackForm";
 
 const features = [
   {
@@ -42,22 +44,55 @@ const steps = [
 
 const strip = ["mv-a", "mv-b", "mv-c", "mv-d", "mv-e"];
 
+const testimonials = [
+  {
+    quote:
+      "Finally all our trip photos live in one place instead of scattered across ten WhatsApp groups. Game changer.",
+    name: "Aanya",
+    handle: "Batch '25",
+    seed: "mv-t1",
+    stars: 5,
+  },
+  {
+    quote:
+      "Love that it's invite-only. It actually feels like our private corner — no randoms, no ads, just us.",
+    name: "Rohan",
+    handle: "Hostel B crew",
+    seed: "mv-t2",
+    stars: 5,
+  },
+  {
+    quote:
+      "Set up a group, dropped the link in our batch chat, and everyone was posting within minutes. So easy.",
+    name: "Meera",
+    handle: "CS '24",
+    seed: "mv-t3",
+    stars: 5,
+  },
+];
+
 export default function LandingPage() {
   return (
     <div className="relative">
       {/* Nav */}
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
-        <div className="flex items-center gap-2.5 font-bold">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg grad-accent text-base shadow-md shadow-indigo-500/30">
-            <img src="/icon.png" alt="Memora icon" style={{ width: "50%", height: "50%" }} />
+        <div className="group flex items-center gap-2.5 font-bold">
+          <span className="transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6">
+            <Logo size={32} />
           </span>
-          <span className="grad-text text-lg tracking-tight">Memora</span>
+          <span className="grad-text font-display text-lg tracking-tight">Memora</span>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
+          <Link
+            href="#feedback"
+            className="link-sweep hidden text-sm font-medium text-muted transition hover:text-app sm:inline"
+          >
+            Feedback
+          </Link>
           <ThemeToggle />
           <Link
             href="/login"
-            className="text-sm font-medium text-muted underline-offset-4 transition hover:text-app hover:underline"
+            className="link-sweep text-sm font-medium text-muted transition hover:text-app"
           >
             Sign in
           </Link>
@@ -66,11 +101,14 @@ export default function LandingPage() {
 
       {/* Hero */}
       <section className="mx-auto max-w-6xl px-6 pt-16 pb-24 sm:pt-28 sm:pb-32">
-        <p className="animate-fade-up text-xs font-semibold uppercase tracking-[0.25em] text-faint">
+        <div className="animate-fade-up">
+          <Logo size={64} float className="rounded-2xl" />
+        </div>
+        <p className="animate-fade-up mt-8 text-xs font-semibold uppercase tracking-[0.25em] text-faint">
           Invite-only · for your college crew
         </p>
         <h1
-          className="animate-fade-up mt-8 max-w-4xl text-5xl font-bold leading-[0.95] tracking-tight text-app sm:text-7xl lg:text-8xl"
+          className="animate-fade-up mt-6 max-w-4xl font-display text-5xl font-bold leading-[0.95] tracking-tight text-app sm:text-7xl lg:text-8xl"
           style={{ animationDelay: "80ms" }}
         >
           Every memory,
@@ -105,7 +143,7 @@ export default function LandingPage() {
       {/* Statement band + memory strip */}
       <section className="border-y border-app">
         <div className="mx-auto max-w-6xl px-6 py-16">
-          <h2 className="max-w-3xl text-2xl font-semibold leading-snug tracking-tight text-app sm:text-4xl">
+          <h2 className="max-w-3xl font-display text-2xl font-semibold leading-snug tracking-tight text-app sm:text-4xl">
             Not social media. <span className="text-faint">Just your people,</span>{" "}
             your moments, kept safe — and yours forever.
           </h2>
@@ -134,9 +172,10 @@ export default function LandingPage() {
         <p className="text-xs font-semibold uppercase tracking-[0.25em] text-faint">
           What&apos;s inside
         </p>
-        <h2 className="mt-4 max-w-2xl text-4xl font-bold tracking-tight text-app sm:text-5xl">
+        <h2 className="mt-4 max-w-2xl font-display text-4xl font-bold tracking-tight text-app sm:text-5xl">
           Everything your group needs.
         </h2>
+        <hr className="grad-line mt-8" />
         <div className="mt-14">
           {features.map((f) => (
             <div
@@ -162,7 +201,7 @@ export default function LandingPage() {
           <p className="text-xs font-semibold uppercase tracking-[0.25em] text-faint">
             How it works
           </p>
-          <h2 className="mt-4 text-4xl font-bold tracking-tight text-app sm:text-5xl">
+          <h2 className="mt-4 font-display text-4xl font-bold tracking-tight text-app sm:text-5xl">
             Up and running in minutes.
           </h2>
           <div className="mt-14 grid gap-10 sm:grid-cols-3">
@@ -177,9 +216,70 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Feedback — testimonials + form */}
+      <section id="feedback" className="scroll-mt-20 border-t border-app">
+        <div className="mx-auto max-w-6xl px-6 py-24">
+          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-faint">
+            Loved by groups
+          </p>
+          <h2 className="mt-4 font-display text-4xl font-bold tracking-tight text-app sm:text-5xl">
+            What people are saying.
+          </h2>
+
+          <div className="mt-14 grid gap-5 sm:grid-cols-3">
+            {testimonials.map((t, i) => (
+              <figure
+                key={t.seed}
+                className="glass glass-hover animate-fade-up flex flex-col rounded-2xl p-6"
+                style={{ animationDelay: `${i * 80}ms` }}
+              >
+                <div className="text-sm text-amber-400">
+                  {"★".repeat(t.stars)}
+                  <span className="text-subtle">
+                    {"★".repeat(5 - t.stars)}
+                  </span>
+                </div>
+                <blockquote className="mt-3 flex-1 text-base leading-relaxed text-muted">
+                  “{t.quote}”
+                </blockquote>
+                <figcaption className="mt-5 flex items-center gap-3">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={`https://picsum.photos/seed/${t.seed}/80/80`}
+                    alt={t.name}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-10 w-10 rounded-full object-cover ring-2 ring-[color:var(--border)]"
+                  />
+                  <div>
+                    <p className="text-sm font-semibold text-app">{t.name}</p>
+                    <p className="text-xs text-subtle">{t.handle}</p>
+                  </div>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+
+          {/* Feedback form */}
+          <div className="mx-auto mt-20 max-w-2xl">
+            <div className="mb-8 text-center">
+              <h3 className="font-display text-3xl font-bold tracking-tight text-app sm:text-4xl">
+                Got <span className="grad-text">thoughts?</span>
+              </h3>
+              <p className="mx-auto mt-3 max-w-md text-base text-muted">
+                We&apos;re building Memora for groups like yours. Tell us what
+                you love or what we should add next.
+              </p>
+            </div>
+            <FeedbackForm />
+          </div>
+        </div>
+      </section>
+
       {/* Closing CTA */}
       <section className="mx-auto max-w-6xl px-6 py-28 text-center">
-        <h2 className="mx-auto max-w-3xl text-4xl font-bold leading-tight tracking-tight text-app sm:text-6xl">
+        <hr className="grad-line mx-auto mb-12 max-w-xs" />
+        <h2 className="mx-auto max-w-3xl font-display text-4xl font-bold leading-tight tracking-tight text-app sm:text-6xl">
           Start your group&apos;s <span className="grad-text">vault</span> today.
         </h2>
         <p className="mx-auto mt-5 max-w-md text-lg text-muted">
@@ -197,10 +297,8 @@ export default function LandingPage() {
       <footer className="border-t border-app">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-10 sm:flex-row">
           <div className="flex items-center gap-2 text-sm text-faint">
-            <span className="flex h-6 w-6 items-center justify-center rounded-md grad-accent text-xs">
-              📸
-            </span>
-            Memora
+            <Logo size={24} className="rounded-md" />
+            <span className="font-display">Memora</span>
           </div>
           <p className="text-xs text-subtle">
             © 2026 Memora · Made for Batch 2024–28

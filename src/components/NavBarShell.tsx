@@ -7,6 +7,7 @@ import ThemeToggle from "@/components/theme/ThemeToggle";
 import SearchBar from "@/components/search/SearchBar";
 import NotificationsBell from "@/components/NotificationsBell";
 import UserMenu from "@/components/UserMenu";
+import Logo from "@/components/Logo";
 
 const LINKS = [{ href: "/groups", label: "My Groups" }];
 
@@ -50,12 +51,12 @@ export default function NavBarShell({
         <Link
           href="/groups"
           onClick={closeMobile}
-          className="flex shrink-0 items-center gap-2.5 font-bold"
+          className="group flex shrink-0 items-center gap-2.5 font-bold"
         >
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg grad-accent text-base shadow-md shadow-indigo-500/30">
-            📸
+          <span className="transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6">
+            <Logo size={32} />
           </span>
-          <span className="grad-text hidden text-lg tracking-tight sm:inline">
+          <span className="grad-text hidden font-display text-lg tracking-tight sm:inline">
             Memora
           </span>
         </Link>

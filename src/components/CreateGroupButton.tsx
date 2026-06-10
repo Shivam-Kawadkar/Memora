@@ -21,18 +21,18 @@ export default function CreateGroupButton() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="rounded-xl grad-accent px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition hover:shadow-indigo-500/40 active:scale-[0.97]"
+        className="w-full rounded-xl grad-accent px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition hover:-translate-y-0.5 hover:shadow-indigo-500/40 active:scale-[0.97] sm:w-auto"
       >
         + Create group
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4">
           <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="animate-fade-in fixed inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => !pending && setOpen(false)}
           />
-          <div className="animate-fade-up relative w-full max-w-md rounded-2xl glass p-6 shadow-2xl">
+          <div className="animate-pop relative my-auto max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl glass p-6 shadow-2xl">
             <h2 className="text-xl font-bold text-app">Create a group</h2>
             <p className="mt-1 text-sm text-faint">
               Start a private space for your memories.

@@ -18,6 +18,7 @@ export default function LikeButton({
 }) {
   const [liked, setLiked] = useState(initialLiked);
   const [count, setCount] = useState(initialCount);
+  const [burst, setBurst] = useState(false);
   const [, startTransition] = useTransition();
 
   function toggle() {
@@ -25,6 +26,11 @@ export default function LikeButton({
     const nextLiked = !liked;
     setLiked(nextLiked);
     setCount((c) => c + (nextLiked ? 1 : -1));
+    if (nextLiked) {
+      setBurst(false);
+      // Re-trigger the pop animation on each new like.
+      requestAnimationFrame(() => setBurst(true));
+    }
     startTransition(async () => {
       const res = await toggleLikeAction(memoryId, groupId);
       if (res?.error || typeof res?.liked !== "boolean") {
@@ -44,7 +50,13 @@ export default function LikeButton({
         size === "lg" ? "text-base" : "text-sm"
       }`}
     >
-      <span className={size === "lg" ? "text-xl" : "text-base"}>
+      <span
+        key={liked ? "on" : "off"}
+        onAnimationEnd={() => setBurst(false)}
+        className={`${size === "lg" ? "text-xl" : "text-base"} ${
+          burst && liked ? "animate-heart" : ""
+        }`}
+      >
         {liked ? "❤️" : "🤍"}
       </span>
       <span className={liked ? "font-medium text-pink-500" : "text-faint"}>

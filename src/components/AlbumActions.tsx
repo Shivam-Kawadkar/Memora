@@ -83,14 +83,14 @@ export default function AlbumActions({
     <div className="flex items-center gap-2">
       <button
         onClick={() => setEditing(true)}
-        className="rounded-lg glass px-3 py-1.5 text-sm font-medium text-muted transition hover:text-app"
+        className="rounded-lg bg-white/15 px-3 py-1.5 text-sm font-medium text-white backdrop-blur-md transition hover:bg-white/25 active:scale-95"
       >
         Rename
       </button>
       <button
         onClick={onDelete}
         disabled={pending}
-        className="rounded-lg border border-red-500/40 px-3 py-1.5 text-sm font-medium text-red-600 transition hover:bg-red-500/10 disabled:opacity-50 dark:text-red-400"
+        className="rounded-lg bg-red-500/80 px-3 py-1.5 text-sm font-medium text-white backdrop-blur-md transition hover:bg-red-500 disabled:opacity-50 active:scale-95"
       >
         Delete album
       </button>

@@ -12,6 +12,7 @@ export type Group = {
   name: string;
   description: string;
   coverColor: string;
+  coverUrl: string | null; // latest memory image, used as a banner
   memberCount: number;
   myRole: Role;
 };

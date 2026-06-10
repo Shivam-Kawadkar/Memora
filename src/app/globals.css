@@ -46,6 +46,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-display);
 }
 
 body {
@@ -127,13 +128,60 @@ body {
   background-image: linear-gradient(135deg, #6366f1, #a855f7);
 }
 .grad-text {
-  background-image: linear-gradient(135deg, #6366f1, #a855f7);
+  background-image: linear-gradient(110deg, #6366f1, #a855f7, #ec4899, #6366f1);
+  background-size: 250% auto;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  animation: grad-shift 6s linear infinite;
 }
 .dark .grad-text {
-  background-image: linear-gradient(135deg, #818cf8, #c084fc);
+  background-image: linear-gradient(110deg, #818cf8, #c084fc, #f472b6, #818cf8);
+}
+@keyframes grad-shift {
+  to {
+    background-position: 250% center;
+  }
+}
+
+/* Decorative gradient hairline — a beautiful divider/accent line */
+.grad-line {
+  height: 1px;
+  border: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--aurora-1),
+    var(--aurora-2),
+    transparent
+  );
+  opacity: 0.6;
+}
+.grad-line-soft {
+  height: 1px;
+  border: 0;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+}
+
+/* Animated underline that sweeps in on hover */
+.link-sweep {
+  position: relative;
+}
+.link-sweep::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  height: 2px;
+  width: 100%;
+  border-radius: 9999px;
+  background-image: linear-gradient(90deg, #6366f1, #a855f7);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+.link-sweep:hover::after {
+  transform: scaleX(1);
 }
 
 @keyframes fade-up {
@@ -148,6 +196,161 @@ body {
 }
 .animate-fade-up {
   animation: fade-up 0.5s ease both;
+}
+
+/* Springy pop-in — for modals & toasts */
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.92) translateY(12px);
+  }
+  60% {
+    transform: scale(1.01) translateY(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+.animate-pop {
+  animation: pop-in 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Quick fade for backdrops */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.animate-fade-in {
+  animation: fade-in 0.25s ease both;
+}
+
+/* Heart pop — celebratory like */
+@keyframes heart-pop {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.4) rotate(-8deg);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.animate-heart {
+  animation: heart-pop 0.45s ease both;
+}
+
+/* ---------- Loading animations ---------- */
+
+/* Shimmer skeleton — sweep a light band across a soft surface */
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface-soft);
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--surface-border),
+    transparent
+  );
+  animation: shimmer 1.5s infinite;
+}
+
+/* Bouncing-dots loader */
+@keyframes dot-bounce {
+  0%,
+  80%,
+  100% {
+    transform: scale(0.5);
+    opacity: 0.4;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.dots span {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background-image: linear-gradient(135deg, #6366f1, #a855f7);
+  animation: dot-bounce 1.4s ease-in-out infinite both;
+}
+.dots span:nth-child(2) {
+  animation-delay: 0.16s;
+}
+.dots span:nth-child(3) {
+  animation-delay: 0.32s;
+}
+
+/* Gradient ring spinner */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.spinner-ring {
+  border-radius: 9999px;
+  background: conic-gradient(from 0deg, transparent, var(--aurora-2));
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 0);
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 0);
+  animation: spin 0.8s linear infinite;
+}
+
+/* Soft pulse for placeholder blocks */
+@keyframes pulse-soft {
+  50% {
+    opacity: 0.5;
+  }
+}
+.animate-pulse-soft {
+  animation: pulse-soft 1.6s ease-in-out infinite;
+}
+
+/* Gentle floating bob — for hero logo / accents */
+@keyframes float-bob {
+  50% {
+    transform: translateY(-8px);
+  }
+}
+.animate-float {
+  animation: float-bob 4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grad-text,
+  .animate-float,
+  .animate-heart,
+  .skeleton::after,
+  .dots span,
+  .spinner-ring,
+  .animate-pulse-soft {
+    animation: none !important;
+  }
 }
 
 ::-webkit-scrollbar {

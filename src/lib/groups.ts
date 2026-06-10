@@ -1,6 +1,47 @@
 import { createClient } from "@/lib/supabase/server";
 import type { Group, Role } from "@/lib/types";
 
+const COVER_TTL = 60 * 60; // signed-URL lifetime for banner images
+
+// Latest memory image (signed URL) for each group, used as a banner.
+// Groups with no memories simply won't appear in the map.
+async function getGroupCovers(
+  groupIds: string[],
+): Promise<Record<string, string>> {
+  if (groupIds.length === 0) return {};
+  const supabase = await createClient();
+
+  const { data: mems } = await supabase
+    .from("memories")
+    .select("group_id, image_path, created_at")
+    .in("group_id", groupIds)
+    .order("created_at", { ascending: false });
+
+  // First (newest) path seen per group wins.
+  const coverPath = new Map<string, string>();
+  for (const m of mems ?? []) {
+    if (!coverPath.has(m.group_id)) coverPath.set(m.group_id, m.image_path);
+  }
+
+  const paths = [...coverPath.values()];
+  if (paths.length === 0) return {};
+
+  const { data: signed } = await supabase.storage
+    .from("memories")
+    .createSignedUrls(paths, COVER_TTL);
+  const urlByPath = new Map<string, string>();
+  for (const s of signed ?? []) {
+    if (s.path && s.signedUrl) urlByPath.set(s.path, s.signedUrl);
+  }
+
+  const covers: Record<string, string> = {};
+  for (const [groupId, path] of coverPath) {
+    const url = urlByPath.get(path);
+    if (url) covers[groupId] = url;
+  }
+  return covers;
+}
+
 export const COVER_COLORS = [
   "#6366f1",
   "#ec4899",
@@ -32,7 +73,10 @@ export async function getMyGroups(): Promise<Group[]> {
   if (error || !memberships) return [];
 
   const groupIds = memberships.map((m) => m.group_id);
-  const counts = await getMemberCounts(groupIds);
+  const [counts, covers] = await Promise.all([
+    getMemberCounts(groupIds),
+    getGroupCovers(groupIds),
+  ]);
 
   return memberships
     .filter((m) => m.groups)
@@ -48,6 +92,7 @@ export async function getMyGroups(): Promise<Group[]> {
         name: g.name,
         description: g.description ?? "",
         coverColor: g.cover_color ?? "#6366f1",
+        coverUrl: covers[g.id] ?? null,
         memberCount: counts[g.id] ?? 1,
         myRole: m.role as Role,
       };
@@ -62,8 +107,8 @@ export async function getGroupForUser(groupId: string): Promise<Group | null> {
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  // group row, my membership, and member counts are independent reads.
-  const [groupRes, membershipRes, counts] = await Promise.all([
+  // group row, my membership, member counts, and cover are independent reads.
+  const [groupRes, membershipRes, counts, covers] = await Promise.all([
     supabase
       .from("groups")
       .select("id, name, description, cover_color")
@@ -76,6 +121,7 @@ export async function getGroupForUser(groupId: string): Promise<Group | null> {
       .eq("user_id", user.id)
       .maybeSingle(),
     getMemberCounts([groupId]),
+    getGroupCovers([groupId]),
   ]);
 
   const group = groupRes.data;
@@ -87,6 +133,7 @@ export async function getGroupForUser(groupId: string): Promise<Group | null> {
     name: group.name,
     description: group.description ?? "",
     coverColor: group.cover_color ?? "#6366f1",
+    coverUrl: covers[groupId] ?? null,
     memberCount: counts[groupId] ?? 1,
     myRole: myMembership.role as Role,
   };

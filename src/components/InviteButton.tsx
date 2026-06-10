@@ -32,7 +32,7 @@ export default function InviteButton({ groupId }: { groupId: string }) {
     <>
       <button
         onClick={generate}
-        className="rounded-xl glass px-4 py-2.5 text-sm font-medium text-muted transition hover:text-app"
+        className="rounded-xl bg-white/15 px-4 py-2.5 text-sm font-medium text-white backdrop-blur-md transition hover:bg-white/25 active:scale-95"
       >
         🔗 Invite
       </button>

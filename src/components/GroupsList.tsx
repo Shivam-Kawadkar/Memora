@@ -77,12 +77,22 @@ export default function GroupsList({ groups }: { groups: Group[] }) {
           )}
           <Link href={`/groups/${group.id}`} className="block">
             <div
-              className="relative h-28 w-full"
+              className="relative h-28 w-full overflow-hidden"
               style={{
                 backgroundImage: `linear-gradient(135deg, ${group.coverColor}, #a855f7)`,
               }}
             >
-              <div className="absolute inset-0 bg-black/10" />
+              {group.coverUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={group.coverUrl}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
             </div>
             <div className="p-5">
               <div className="flex items-center justify-between gap-3">

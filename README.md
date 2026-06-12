@@ -166,6 +166,6 @@ redeploys on every push.
 
 <div align="center">
 
-📋 Roadmap → [plan.md](../plan.md) · 📐 Technical spec → [specs.md](../specs.md)
+📋 Roadmap → [plan.md](docs/plan.md) · 📐 Technical spec → [specs.md](docs/specs.md)
 
 </div>
